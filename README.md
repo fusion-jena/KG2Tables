@@ -31,7 +31,7 @@ This service provides the proxy to Wikidata KG (Lookup API + Sparql Endpoint) to
     * e.g., remove a row that is annotated as sandwich given only a country name (Italy might contain 1000 sandwich, so, it is impossible for a system, even a human, determine that the correct class of Italy is Sandwich)
     * This step also contains the table header and names anonymization using random characters and numbers
   * The last step is the creation of the ground truth format that splits the actual tables to be annotated from the STI answers
-![Method image!](imgs/Methodology.png)
+![Method image!](imgs/methodology.png)
 
 
 ## Quick Setup 
