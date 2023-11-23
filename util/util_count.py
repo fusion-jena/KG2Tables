@@ -3,6 +3,7 @@ from os.path import join, realpath, basename
 from collections import OrderedDict
 import json
 import inc.api_properties
+from util import util_log
 
 
 async def count_everything():
@@ -21,9 +22,9 @@ async def count_everything():
     cpt2 = sum([len(files) for r, d, files in os.walk(target_path)])
     print(cpt2)
 
-    print('entities: {}'.format(cpt1))
-    print('other files: {}'.format(cpt2))
-    print('total: {}'.format(cpt1 + cpt2))
+    util_log.info('entities: {}'.format(cpt1))
+    util_log.info('other files: {}'.format(cpt2))
+    util_log.info('total: {}'.format(cpt1 + cpt2))
 
     target_path = join(realpath('.'), 'data', 'results')
     cnt = 0

@@ -50,7 +50,7 @@ def split():
         cpa_gt = cpa_gt[cpa_gt['sol'].notna()]
         print(len(cpa_gt))
 
-        r2i_gt = pd.read_csv(join(data_path, 'gt', 'r2i_gt.csv'), names=['file', 'rowid', 'sol'])
+        r2i_gt = pd.read_csv(join(data_path, 'gt', 'ra_gt.csv'), names=['file', 'rowid', 'sol'])
         print(len(r2i_gt))
         r2i_gt = r2i_gt[r2i_gt['sol'].notna()]
         print(len(r2i_gt))
@@ -80,7 +80,7 @@ def split():
                           columns=['file', 'colid', 'rowid', 'sol'])
         val_cpa_gt.to_csv(join(val_path, 'gt', 'cpa_gt.csv'), sep=',', index=False, header=False,
                           columns=['file', 'subjid', 'objid', 'sol'])
-        val_r2i_gt.to_csv(join(val_path, 'gt', 'r2i_gt.csv'), sep=',', index=False, header=False,
+        val_r2i_gt.to_csv(join(val_path, 'gt', 'ra_gt.csv'), sep=',', index=False, header=False,
                           columns=['file', 'rowid', 'sol'])
         val_td_gt.to_csv(join(val_path, 'gt', 'td_gt.csv'), sep=',', index=False, header=False, columns=['file', 'sol'])
 
@@ -90,7 +90,7 @@ def split():
                            columns=['file', 'colid', 'rowid', 'sol'])
         test_cpa_gt.to_csv(join(test_path, 'gt', 'cpa_gt.csv'), sep=',', index=False, header=False,
                            columns=['file', 'subjid', 'objid', 'sol'])
-        test_r2i_gt.to_csv(join(test_path, 'gt', 'r2i_gt.csv'), sep=',', index=False, header=False,
+        test_r2i_gt.to_csv(join(test_path, 'gt', 'ra_gt.csv'), sep=',', index=False, header=False,
                            columns=['file', 'rowid', 'sol'])
         test_td_gt.to_csv(join(test_path, 'gt', 'td_gt.csv'), sep=',', index=False, header=False,
                           columns=['file', 'sol'])
