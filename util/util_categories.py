@@ -1,7 +1,8 @@
 from os.path import join, realpath, exists
+from config import CATEGORIES_FILE_NAME
 import csv
 
-cate_file_path = join(realpath('.'), 'data', 'input', 'categories.csv')
+cate_file_path = join(realpath('.'), 'data', 'input', CATEGORIES_FILE_NAME)
 
 
 async def get_categories_from_file():

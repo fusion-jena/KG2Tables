@@ -1,6 +1,8 @@
 import os
 
 BENCHMARK_NAME = 'tfood.testing'
+CATEGORIES_FILE_NAME = 'short.csv'
+MAX_DEPTH = 10
 
 ##### Lookup API Config.
 Target_Ontology = "http://wikidata.org/entity/"
