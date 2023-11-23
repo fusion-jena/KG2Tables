@@ -1,3 +1,4 @@
+import json
 from math import floor
 from os.path import join, exists, realpath, basename, splitext
 from os import makedirs, walk, listdir
@@ -6,7 +7,7 @@ import random
 import csv
 import inc.api_types
 from collections import Counter
-import util.util_split, util.util_entity_split
+from util import util_log
 import re
 import config
 
@@ -114,12 +115,10 @@ async def save_table(src_root, original_file, new_file):
             try:
                 parts = (df.loc[i][j]).split('_sol_')
                 df.loc[i][j] = parts[0]
-                # TODO: change starts with to regex for WIKIID, this has http://wiki.../Queller in gt data
-                #  I fixed it manually
 
-                if len(parts) == 2 and parts[1].startswith('Q'):
+                if len(parts) == 2:
+
                     # skip literal values no gt for CEA here
-
                     if parts[0] == parts[1]:
                         continue
 
@@ -127,10 +126,11 @@ async def save_table(src_root, original_file, new_file):
                     matches = re.findall(regex, parts[1])
                     if not matches:
                         continue  # skip any value that doesn't match this regex
-                    # add it to targets of CEA (filename, column, row, gt)
 
+                    # add it to targets of CEA (filename, column, row, gt)
                     gt_value = ','.join([WIKI_ENT_ID + v.strip() for v in parts[1].split(',')])
                     cea_gt += [[splitext(new_file)[0], j, i, gt_value]]
+
                     # add current cell annotation to the column annotations
                     cells_annotations += gt_value.split(',')
             except Exception as e:
@@ -240,13 +240,13 @@ async def save_gt_targets(dest_gt_path, dest_targets_path,
         csvwriter.writerows(all_cpa_targets)
 
     # ----------------- r2i ----------------------------
-    if all_r2i_gt:
-        with open(join(dest_gt_path, 'r2i_gt.csv'), 'a', encoding='utf-8', newline='') as file:
+    if all_r2i_gt: #r2i has been changed to ra (Row Annotation) on 23 Nov 23
+        with open(join(dest_gt_path, 'ra_gt.csv'), 'a', encoding='utf-8', newline='') as file:
             csvwriter = csv.writer(file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
             csvwriter.writerows(all_r2i_gt)
 
         all_r2i_targets = [item[:-1] for item in all_r2i_gt]
-        with open(join(dest_targets_path, 'r2i_targets.csv'), 'a', newline='') as file:
+        with open(join(dest_targets_path, 'ra_targets.csv'), 'a', newline='') as file:
             csvwriter = csv.writer(file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
             csvwriter.writerows(all_r2i_targets)
 
@@ -274,71 +274,75 @@ async def get_table_categories_map(target_path):
 async def handel_entities_tables():
     entities_path = join(input_path, 'entities')
 
-    table_cates_map = await get_table_categories_map(entities_path)
-
-    filename = get_random_letter(3)
-
-    all_cea_gt, all_cpa_gt, all_td_gt = [], [], []
     for root, dirs, files in walk(entities_path):
-        current_cate = basename(root)
-        filename += str(table_cates_map[current_cate])
-        filename += get_random_letter(1)
+
+        filename = await get_base_filename(root, entities_path)
+
         valid_files = [f for f in files if splitext(f)[1] == '.csv']
         cnt = len(valid_files)
         if cnt > 0:
+            util_log.info(root)
 
             for i, f in enumerate(valid_files):
-                final_name = filename + str(i).zfill(len(str(cnt))) + '.csv'
+
+                util_log.info("{} is mapped to {}".format(f, i))
+
+                current_final_name = filename + "I" + str(i).zfill(len(str(cnt))) + '.csv'
 
                 # actual saving of the file
                 t_cea_gt, t_cpa_gt, t_td_gt = await save_entity_table(src_root=root,
-                                                                      original_file=f, new_file=final_name)
-
-                # all_cea_gt += t_cea_gt
-                # all_cpa_gt += t_cpa_gt
-                # all_td_gt += t_td_gt
+                                                                      original_file=f, new_file=current_final_name)
 
                 # save gt and targets
                 await save_gt_targets(entity_gt_path, entity_targets_path,
                                       t_cea_gt, None, t_cpa_gt, None, t_td_gt)
 
-                # break
-            # reset to a new file name
-            filename = get_random_letter(4)
+
+async def get_base_filename(root, root_path):
+    table_cates_map = await get_table_categories_map(root_path)
+
+    util_log.info('Table categories map: %s' % json.dumps(table_cates_map))
+
+    filename = get_random_letter(3)
+
+    root_categories = root.split('\\')
+    for cat in root_categories:
+        if cat in table_cates_map:
+            filename += str(table_cates_map[cat]).zfill(len(str(len(table_cates_map))))
+            # filename += '_' # easier to debug
+
+    return filename
 
 
 async def handle_horizontal_tables():
     horizontal_path = join(input_path, 'horizontal')
-    table_cates_map = await get_table_categories_map(horizontal_path)
 
-    filename = get_random_letter(3)
-
-    all_cea_gt, all_cta_gt, all_cpa_gt, all_r2i_gt, all_td_gt = [], [], [], [], []
     for root, dirs, files in walk(horizontal_path):
-        current_cate = basename(root)
-        filename += str(table_cates_map[current_cate])
-        filename += get_random_letter(1)
+
+        filename = await get_base_filename(root, horizontal_path)
+
         valid_files = [f for f in files if splitext(f)[1] == '.csv']
+        valid_files.sort()
         cnt = len(valid_files)
         if cnt > 0:
+            util_log.info(root)
 
             for i, f in enumerate(valid_files):
-                final_name = filename + str(i).zfill(len(str(cnt))) + '.csv'
+
+                util_log.info("{} is mapped to {}".format(f, i))
+
+                c_final_name = filename + "I" + str(i).zfill(len(str(cnt))) + '.csv'
 
                 # actual saving of the file
                 t_cea_gt, t_cta_gt, t_cpa_gt, t_r2i_gt, t_td_gt = await save_table(src_root=root, original_file=f,
-                                                                                   new_file=final_name)
+                                                                                   new_file=c_final_name)
 
                 # save gt and targets
                 await save_gt_targets(horizontal_gt_path, horizontal_targets_path,
                                       t_cea_gt, t_cta_gt, t_cpa_gt, t_r2i_gt, t_td_gt)
 
-                # break
-            # reset to a new file name
-            filename = get_random_letter(4)
-
 
 async def anonymize_files():
     # transform original data to semtab format (tables/targets/gt)
-    await handle_horizontal_tables()
+    # await handle_horizontal_tables()
     await handel_entities_tables()
