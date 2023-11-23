@@ -41,12 +41,12 @@ This service provides the proxy to Wikidata KG (Lookup API + Sparql Endpoint) to
 
 
 ## Endpoints
-| Name                         | Type | Description                                                                                      |
-|------------------------------|------|--------------------------------------------------------------------------------------------------|
-| `generate_benchmark_at_once` | POST | On hot button for creating a domain-specific benchmark based on the given `input/categories.csv` |
-| `generate_tables`            | POST | Generates both `Entity` and `Horizontal` tables for the corresponding categories.csv             |
-| `anonymize_tables`           | POST | Rename tables' names using follow a certain sequence  e.g., Q50 --> UUT10                        |
-| `count`                      | GET  | Provides tables' count for each entity and horizontal tables                                     |
+| Name                          | Type | Description                                                                                      |
+|-------------------------------|------|--------------------------------------------------------------------------------------------------|
+| `generate_benchmark_at_once`  | GET  | On hot button for creating a domain-specific benchmark based on the given `input/categories.csv` |
+| `generate_tables`             | GET  | Generates both `Entity` and `Horizontal` tables for the corresponding categories.csv             |
+| `anonymize_tables`            | GET  | Rename tables' names using follow a certain sequence  e.g., Q50 --> UUT10                        |
+| `count`                       | GET  | Provides tables' count for each entity and horizontal tables                                     |
 
 
 ### `generate_benchmark_at_once` Output format

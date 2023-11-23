@@ -116,7 +116,7 @@ async def routValTestSplit():
     return {'message': 'success, validation and test splits are created.'}
 
 
-@app.route('/generate_benchmark_at_once', methods=['POST'])
+@app.route('/generate_benchmark_at_once', methods=['GET'])
 async def routeGenerate_benchmark_at_once():
     """
     Main entry point to construct a domain-specific benchmark
