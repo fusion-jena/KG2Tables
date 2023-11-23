@@ -1,5 +1,5 @@
 import os
-from os.path import join, realpath
+from os.path import join
 from quart import Quart
 import traceback
 
@@ -20,6 +20,8 @@ import inc.disambiguation
 from util import util_log, util_count, util_split, util_entity_split
 
 util_log.init("wikidata2tables_generator.log")
+util_log.info("Creating benchmark: {} ".format(config.BENCHMARK_NAME))
+util_log.info("Categories are: {}".format(config.CATEGORIES_FILE_NAME))
 
 app = Quart(__name__)
 app.debug = False
@@ -34,15 +36,19 @@ async def routeTest():
 
 async def generate_horizontal_tables():
     # save horizontal tables (WITHOUT) long descriptions (Props ONLY)
+    util_log.info(message='[Horizontal][PROPS Only] Categories to instances and their instances')
     res = await inc.horizontal.api_categories.parse_categories()
+    util_log.info(message='[Horizontal][PROPS Only] Categories to instances and their subclasses+instances')
     res = await inc.horizontal.api_categories_subclasses.parse_categories()
 
     os.rename(join(config.HORIZONTAL_PATH, 'processed_entities.txt'),
               join(config.HORIZONTAL_PATH, 'processed_entities_props_only.txt'))
 
     # save horizontal tables PROPS + long DESCRIPTIONS
+    util_log.info(message='[Horizontal][Props+Des] Categories to instances and their instances')
     inc.horizontal.api_categories.include_categories_desc = True
     res = await inc.horizontal.api_categories.parse_categories()
+    util_log.info(message='[Horizontal][Props+Des] Categories to instances and their subclasses+instances')
     inc.horizontal.api_categories_subclasses.include_categories_desc = True
     res = await inc.horizontal.api_categories_subclasses.parse_categories()
 
@@ -50,7 +56,9 @@ async def generate_horizontal_tables():
               join(config.HORIZONTAL_PATH, 'processed_entities_props+descriptions.txt'))
 
     # save horizontal DESCRIPTIONS only
+    util_log.info(message='[Horizontal][DESC Only] Categories to instances and their instances')
     res = await inc.horizontal.api_categories_2_descriptions.parse_categories()
+    util_log.info(message='[Horizontal][DESC Only] Categories to instances and their subclasses+instances')
     res = await inc.horizontal.api_categories_subclasses_2_descriptions.parse_categories()
 
     os.rename(join(config.HORIZONTAL_PATH, 'processed_entities.txt'),
@@ -64,9 +72,10 @@ async def generate_entity_tables():
     Generates the Entity Tables from given categories.csv
     """
     # save entity tables from instances and subclasses
+    util_log.info(message='[Entities] Categories to instances and their instances')
     res = await inc.entities.api_categories_2_entities.parse_categories()
+    util_log.info(message='[Entities] Categories to Subclasses and their subclasses+instances')
     res = await inc.entities.api_categories_subclasses_2_entities.parse_categories()
-
     return res
 
 
