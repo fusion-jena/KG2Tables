@@ -29,3 +29,12 @@ def info(message):
 
 def error(message):
     log.error(message.encode('utf-8', errors='ignore'))
+
+
+def log_diff(message, res_dict):
+    diff = []
+    for k, v in res_dict.items():
+        diff.extend([i['child'] for i in v])
+    info(message+' {}'.format(len(diff)))
+
+    return diff

@@ -6,6 +6,8 @@ from os import makedirs
 
 from util.util_categories import get_categories_from_file, handle_duplicate_results
 from util.util import batched
+from util import util_log
+
 import config
 
 global_path = config.ENTITIES_PATH
@@ -53,17 +55,16 @@ async def group_by_prop(res_props):
     return final_dict
 
 
-async def parse_categories():
-    # open data/Categories.csv parse it to get categories list
-    categories = await get_categories_from_file()
-
-    # get categories descriptions
-    res_strs = await api_properties.get_strings_for_lst(categories)
+async def generate_recursive_entity_tables(categories, res_strs, depth=0):
 
     # pass these categories to get subclasses
     res_instances = await api_classes.get_instances(categories)
 
     res_instances = await handle_duplicate_results(res_instances, table_type_path='entities')
+
+    new_categories = util_log.log_diff(
+        message='api_categories_2_entities.py: Level {}: New items found via instances:'.format(depth),
+        res_dict=res_instances)
 
     for k, v in res_instances.items():
 
@@ -94,5 +95,29 @@ async def parse_categories():
 
             await save_tables(root_path='instances', folder_name=k, common_description=cate_desc,
                               props_dict=merged_props_dict)
+
+    # stopping condition, you reached max depth (configured) or nothing is retrieved
+    depth += 1
+    if depth == config.MAX_DEPTH or len(new_categories) == 0:
+        return res_instances
+
+    # retrieve new descriptions for the new categories
+    new_res_strs = await api_properties.get_strings_for_lst(new_categories)
+
+    # go deeper with the hierarchy
+    await generate_recursive_entity_tables(new_categories, new_res_strs, depth)
+
+
+async def parse_categories():
+    # open data/Categories.csv parse it to get categories list
+    categories = await get_categories_from_file()
+
+    util_log.info('api_categories_2_entities.py: Categories found: {}'.format(len(categories)))
+
+    # get categories descriptions
+    res_strs = await api_properties.get_strings_for_lst(categories)
+
+    # call the recursive function generates entities of entities
+    res_instances = await generate_recursive_entity_tables(categories, res_strs)
 
     return res_instances

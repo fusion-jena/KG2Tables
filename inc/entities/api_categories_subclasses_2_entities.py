@@ -6,6 +6,7 @@ from os import makedirs
 
 from util.util_categories import get_categories_from_file, handle_duplicate_results
 from util.util import batched
+from util import util_log
 import config
 
 global_path = config.ENTITIES_PATH
@@ -92,17 +93,17 @@ async def handle_results(res, res_strs, are_subclasses=True):
                               props_dict=merged_props_dict, are_subclasses=are_subclasses)
 
 
-async def parse_categories():
-    # open data/Categories.csv parse it to get categories list
-    categories = await get_categories_from_file()
-
-    # get categories descriptions
-    res_strs = await api_properties.get_strings_for_lst(categories)
-
+async def generate_recursive_entity_tables(categories, res_strs, depth=0):
     # pass these categories to get subclasses
     res_subclasses = await api_classes.get_subclasses(categories)
 
     res_subclasses = await handle_duplicate_results(res_subclasses, 'entities')
+
+    new_subs_categories = util_log.log_diff(
+        message='api_categories_subclasses_2_entities.py: '
+                'Level {}: '
+                'New items found via [Subclasses]:'.format(depth),
+        res_dict=res_subclasses)
 
     await handle_results(res_subclasses, res_strs, are_subclasses=True)
 
@@ -119,14 +120,18 @@ async def parse_categories():
         except Exception as e:
             print(e)
 
-    print(len(new_instances))
-    new_instances = await handle_duplicate_results(new_instances, '')
-    print(len(new_instances))
+    new_instances = await handle_duplicate_results(new_instances, 'entities')
+
+    new_inst_categories = util_log.log_diff(
+        message='api_categories_subclasses_2_entities.py: '
+                'Level {}:'
+                'New items found via [Instances]:'.format(depth),
+        res_dict=new_instances)
 
     # We keep a category if it has more than 2 instances
     useless_cates = [k for k, v in new_instances.items() if len(v) < 2]
     [new_instances.pop(k) for k in useless_cates]
-    print(len(new_instances))
+    # print(len(new_instances))
 
     # get categories descriptions
     res_strs = await api_properties.get_strings_for_lst(new_categories)
@@ -134,4 +139,27 @@ async def parse_categories():
     # handle tables that come from the new instances
     await handle_results(new_instances, res_strs, are_subclasses=False)
 
-    return new_instances
+    # stopping condition, you reached max depth (configured) or nothing is retrieved from the two paths (subs and inst)
+    depth += 1
+    if depth == config.MAX_DEPTH or len(new_subs_categories) == len(new_inst_categories) == 0:
+        return new_instances
+
+    # get categories descriptions
+    res_strs = await api_properties.get_strings_for_lst(new_subs_categories)
+
+    # go deeper with the hierarchy
+    await generate_recursive_entity_tables(categories=new_subs_categories, res_strs=res_strs, depth=depth)
+
+
+async def parse_categories():
+    # open data/Categories.csv parse it to get categories list
+    categories = await get_categories_from_file()
+    util_log.info('api_categories_subclasses_2_entities.py: Categories found: {}'.format(len(categories)))
+
+    # get categories descriptions
+    res_strs = await api_properties.get_strings_for_lst(categories)
+
+    # call the recursive function generates entities of entities
+    res_instances = await generate_recursive_entity_tables(categories, res_strs)
+
+    return res_instances
