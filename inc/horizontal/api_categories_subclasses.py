@@ -8,6 +8,7 @@ from collections import OrderedDict
 
 import pandas as pd
 
+from util import util_log
 from util.util_categories import get_categories_from_file, handle_duplicate_results
 from util.util import batched
 import random
@@ -82,6 +83,7 @@ async def get_full_entities(shared_entities, their_props, res_props):
 
     return final_entities_dict
 
+
 async def save_random_props(root_path, df, filename, common_description=None, are_subclasses=True):
     if are_subclasses:
         # means outcome of this fn = tables from the subclasses of the categories
@@ -97,17 +99,17 @@ async def save_random_props(root_path, df, filename, common_description=None, ar
     if not exists(target_path):
         makedirs(target_path)
 
-
     cols = list(df.columns)
     cnt = len(cols)
 
     random.seed(42)
-    cols_to_remove = random.sample(range(1, cnt), int(0.5*cnt))
-    final_cols = [cols[i] for i in range(cnt) if i not in cols_to_remove ]
+    cols_to_remove = random.sample(range(1, cnt), int(0.5 * cnt))
+    final_cols = [cols[i] for i in range(cnt) if i not in cols_to_remove]
 
     new_df = df[final_cols]
 
     new_df.to_csv(join(target_path, filename), sep=',', encoding='utf-8', index=False, header=True)
+
 
 async def save_table(root_path, filename, cols, rows, common_description=None, are_subclasses=True):
     if are_subclasses:
@@ -147,8 +149,8 @@ async def save_table(root_path, filename, cols, rows, common_description=None, a
     df.to_csv(join(target_path, filename), sep=',', encoding='utf-8', index=False, header=True)
     return df
 
-async def handle_results(subclasses, res_strs, are_subclasses=True):
 
+async def handle_results(subclasses, res_strs, are_subclasses=True):
     # the actual common description that would appear in tables
     cate_desc = None
 
@@ -191,7 +193,8 @@ async def handle_results(subclasses, res_strs, are_subclasses=True):
                 rows_obj = await get_full_entities(entities, their_props, res_props)
 
                 all_props_df = await save_table(root_path='all_props', filename='{}.csv'.format(k), cols=their_props,
-                                 rows=rows_obj, common_description=cate_desc, are_subclasses=are_subclasses)
+                                                rows=rows_obj, common_description=cate_desc,
+                                                are_subclasses=are_subclasses)
 
                 await save_random_props(root_path='random_props', filename='{}.csv'.format(k), df=all_props_df,
                                         common_description=cate_desc, are_subclasses=are_subclasses)
@@ -210,20 +213,17 @@ async def handle_results(subclasses, res_strs, are_subclasses=True):
                 i += 1
 
 
-async def parse_categories():
-    # open data/Categories.csv parse it to get categories list
-    categories = await get_categories_from_file()
-
-    res_strs = None
-    if include_categories_desc:
-        # get categories descriptions
-        res_strs = await api_properties.get_strings_for_lst(categories)
-
+async def generate_recursive_horizontal_tables(categories, res_strs=None, depth=0):
     # pass these categories to get subclasses
     res_subclasses = await api_classes.get_subclasses(categories)
 
     res_subclasses = await handle_duplicate_results(res_subclasses, table_type_path='horizontal')
 
+    new_subs_categories = util_log.log_diff(
+        message='api_categories_subclasses.py: '
+                'Level {}: '
+                'New items found via [Subclasses]:'.format(depth),
+        res_dict=res_subclasses)
 
     # create tables that are derived from subclasses directly
     await handle_results(res_subclasses, res_strs, are_subclasses=True)
@@ -251,13 +251,43 @@ async def parse_categories():
         # get categories descriptions
         res_strs = await api_properties.get_strings_for_lst(new_categories)
 
-    new_instances = await handle_duplicate_results(new_instances, table_type_path='')
+    new_instances = await handle_duplicate_results(new_instances, table_type_path='horizontal')
+
+    new_inst_categories = util_log.log_diff(
+        message='api_categories_subclasses.py: '
+                'Level {}:'
+                'New items found via [Instances]:'.format(depth),
+        res_dict=new_instances)
+
     # handle tables that come from the new instances
     await handle_results(new_instances, res_strs, are_subclasses=False)
 
-    # useful for visualization
-    # od = OrderedDict(sorted(new_instances.items(),
-    #                        key=lambda kv: len(kv[1]), reverse=True)
-    # print(od)
+    # stopping condition, you reached max depth (configured) or nothing is retrieved
+    depth += 1
+    if depth == config.MAX_DEPTH or len(new_subs_categories) == len(new_inst_categories) == 0:
+        return new_instances
 
-    return new_instances
+    new_res_strs = None
+    if include_categories_desc:
+        # retrieve new descriptions for the new categories
+        new_res_strs = await api_properties.get_strings_for_lst(new_categories)
+
+    # go deeper with the hierarchy
+    await generate_recursive_horizontal_tables(new_categories, new_res_strs, depth)
+
+
+async def parse_categories():
+    # open data/Categories.csv parse it to get categories list
+    categories = await get_categories_from_file()
+
+    util_log.info('api_categories_subclasses.py: Categories found: {}'.format(len(categories)))
+
+    res_strs = None
+    if include_categories_desc:
+        # get categories descriptions
+        res_strs = await api_properties.get_strings_for_lst(categories)
+
+    # call the recursive function generates entities of entities
+    res_instances = await generate_recursive_horizontal_tables(categories, res_strs)
+
+    return res_instances

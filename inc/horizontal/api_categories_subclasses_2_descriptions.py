@@ -2,6 +2,8 @@ from inc import api_classes, api_properties
 import csv
 from os.path import join, realpath, exists
 from os import makedirs
+
+from util import util_log
 from util.util_categories import handle_duplicate_results, get_categories_from_file
 import config
 
@@ -42,14 +44,17 @@ async def handle_results(res, are_subclasses=True):
             await save_description_version(k, res_strs, are_subclasses)
 
 
-async def parse_categories():
-    # open data/Categories.csv parse it to get categories list
-    categories = await get_categories_from_file()
-
+async def generate_recursive_horizontal_tables(categories, depth=0):
     # pass these categories to get subclasses
     res_subclasses = await api_classes.get_subclasses(categories)
 
     res_subclasses = await handle_duplicate_results(res_subclasses, table_type_path='horizontal')
+
+    new_subs_categories = util_log.log_diff(
+        message='api_categories_subclasses_2_descriptions.py: '
+                'Level {}: '
+                'New items found via [Subclasses]:'.format(depth),
+        res_dict=res_subclasses)
 
     # create tables that are derived from subclasses directly
     await handle_results(res_subclasses, are_subclasses=True)
@@ -67,15 +72,37 @@ async def parse_categories():
         except Exception as e:
             print(e)
 
-    print(len(new_instances))
     # We keep a category if it has more than 2 instances
     useless_cates = [k for k, v in new_instances.items() if len(v) < 2]
     [new_instances.pop(k) for k in useless_cates]
     print(len(new_instances))
 
-    new_instances = await handle_duplicate_results(new_instances, table_type_path='')
+    new_instances = await handle_duplicate_results(new_instances, table_type_path='horizontal')
+
+    new_inst_categories = util_log.log_diff(
+        message='api_categories_subclasses_2_descriptions.py: '
+                'Level {}:'
+                'New items found via [Instances]:'.format(depth),
+        res_dict=new_instances)
 
     # handle tables that come from the new instances
     await handle_results(new_instances, are_subclasses=False)
+
+    # stopping condition, you reached max depth (configured) or nothing is retrieved
+    depth += 1
+    if depth == config.MAX_DEPTH or len(new_subs_categories) == len(new_inst_categories) == 0:
+        return new_instances
+
+    # go deeper with the hierarchy
+    await generate_recursive_horizontal_tables(new_categories, depth)
+
+
+async def parse_categories():
+    # open data/Categories.csv parse it to get categories list
+    categories = await get_categories_from_file()
+
+    util_log.info('api_categories_subclasses_2_descriptions.py: Categories found: {}'.format(len(categories)))
+
+    res_subclasses = await generate_recursive_horizontal_tables(categories)
 
     return res_subclasses
