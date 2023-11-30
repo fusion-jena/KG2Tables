@@ -4,7 +4,7 @@ from os.path import join, realpath, exists
 from os import makedirs
 
 from util import util_log
-from util.util_categories import handle_duplicate_results, get_categories_from_file
+from util.util_categories import handle_duplicate_results, get_categories_from_file, trim_children
 import config
 
 # results paths
@@ -48,6 +48,9 @@ async def generate_recursive_horizontal_tables(categories, depth=0):
     # pass these categories to get subclasses
     res_subclasses = await api_classes.get_subclasses(categories)
 
+    # limit number of instances to configured value (Q5 to only e.g., 1000 )
+    res_subclasses = await trim_children(res_subclasses)
+
     res_subclasses = await handle_duplicate_results(res_subclasses, table_type_path='horizontal')
 
     new_subs_categories = util_log.log_diff(
@@ -69,6 +72,9 @@ async def generate_recursive_horizontal_tables(categories, depth=0):
     for batch in batched(new_categories, 500):
         try:
             new_instances.update(await api_classes.get_instances(batch))
+
+            # limit number of instances to configured value (Q5 to only e.g., 1000 )
+            new_instances = await trim_children(new_instances)
         except Exception as e:
             print(e)
 

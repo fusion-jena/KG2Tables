@@ -4,7 +4,7 @@ import csv
 from os.path import join, realpath, exists
 from os import makedirs
 
-from util.util_categories import get_categories_from_file, handle_duplicate_results
+from util.util_categories import get_categories_from_file, handle_duplicate_results, trim_children
 from util.util import batched
 from util import util_log
 
@@ -59,6 +59,9 @@ async def generate_recursive_entity_tables(categories, res_strs, depth=0):
 
     # pass these categories to get subclasses
     res_instances = await api_classes.get_instances(categories)
+
+    # limit number of instances to configured value (Q5 to only e.g., 1000 )
+    res_instances = await trim_children(res_instances)
 
     res_instances = await handle_duplicate_results(res_instances, table_type_path='entities')
 

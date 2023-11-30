@@ -9,7 +9,7 @@ from collections import OrderedDict
 import pandas as pd
 
 from util import util_log
-from util.util_categories import get_categories_from_file, handle_duplicate_results
+from util.util_categories import get_categories_from_file, handle_duplicate_results, trim_children
 from util.util import batched
 import random
 
@@ -217,6 +217,9 @@ async def generate_recursive_horizontal_tables(categories, res_strs=None, depth=
     # pass these categories to get subclasses
     res_subclasses = await api_classes.get_subclasses(categories)
 
+    # limit number of instances to configured value (Q5 to only e.g., 1000 )
+    res_subclasses = await trim_children(res_subclasses)
+
     res_subclasses = await handle_duplicate_results(res_subclasses, table_type_path='horizontal')
 
     new_subs_categories = util_log.log_diff(
@@ -238,6 +241,9 @@ async def generate_recursive_horizontal_tables(categories, res_strs=None, depth=
     for batch in batched(new_categories, 1000):
         try:
             new_instances.update(await api_classes.get_instances(batch))
+
+            # limit number of instances to configured value (Q5 to only e.g., 1000 )
+            new_instances = await trim_children(new_instances)
         except Exception as e:
             print(e)
 

@@ -1,8 +1,9 @@
 import os
 
-BENCHMARK_NAME = 'tfood.testing'
-CATEGORIES_FILE_NAME = 'short.csv'
+BENCHMARK_NAME = 'tbiodiv10'
+CATEGORIES_FILE_NAME = 'biodiv_categories.csv'
 MAX_DEPTH = 10
+MAX_NO_INSTANCES = 1000  # trim retrieved instances to this MAX no . Q5 will have at most 2000 instances and subclasses!
 
 ##### Lookup API Config.
 Target_Ontology = "http://wikidata.org/entity/"

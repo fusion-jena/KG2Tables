@@ -78,7 +78,7 @@ async def save_table(src_root, original_file, new_file):
         real_cell_cnt = 0
         for j in range(original_df.shape[1]):  # iterate over columns
             try:
-                if original_df.loc[i][j] != '_sol_':
+                if original_df.iloc[i,j] != '_sol_':
                     real_cell_cnt += 1
             except Exception as e:
                 print(e)
@@ -113,10 +113,12 @@ async def save_table(src_root, original_file, new_file):
         cells_annotations = []
         for i in range(df.shape[0]):  # iterate over rows
             try:
-                parts = (df.loc[i][j]).split('_sol_')
-                df.loc[i][j] = parts[0]
+                parts = (df.iloc[i,j]).split('_sol_')
+                df.iloc[i, j] = parts[0]
+                # TODO: change starts with to regex for WIKIID, this has http://wiki.../Queller in gt data
+                #  I fixed it manually
 
-                if len(parts) == 2:
+                if len(parts) == 2 and parts[1].startswith('Q'):
 
                     # skip literal values no gt for CEA here
                     if parts[0] == parts[1]:
@@ -188,8 +190,8 @@ async def save_entity_table(src_root, original_file, new_file):
 
         for i in range(df.shape[0]):  # iterate over rows
             try:
-                parts = (df.loc[i][j]).split('_sol_')
-                df.loc[i][j] = parts[0]
+                parts = (df.iloc[i,j]).split('_sol_')
+                df.iloc[i,j] = parts[0]
                 if len(parts) == 2 and parts[1].startswith('Q'):
                     # skip literal values no gt for CEA here
                     if parts[0] == parts[1]:
@@ -201,7 +203,7 @@ async def save_entity_table(src_root, original_file, new_file):
             except Exception as e:
                 print(e)
 
-    df.to_csv(join(entity_tables_path, new_file), header=None, index=False)
+    df.to_csv(join(entity_tables_path, new_file), header=False, index=False)
 
     return cea_gt, cpa_gt, td_gt
 
@@ -344,5 +346,5 @@ async def handle_horizontal_tables():
 
 async def anonymize_files():
     # transform original data to semtab format (tables/targets/gt)
-    # await handle_horizontal_tables()
+    await handle_horizontal_tables()
     await handel_entities_tables()

@@ -14,7 +14,7 @@ import pandas as pd
 from itertools import islice, zip_longest
 
 from util import util_log
-from util.util_categories import get_categories_from_file, handle_duplicate_results
+from util.util_categories import get_categories_from_file, handle_duplicate_results, trim_children
 from util.util import batched
 import random
 
@@ -154,6 +154,9 @@ async def save_table(root_path, filename, cols, rows, common_description=None):
 async def generate_recursive_horizontal_tables(categories, res_strs=None, depth=0):
     # pass these categories to get subclasses
     res_instances = await api_classes.get_instances(categories)
+
+    # limit number of instances to configured value (Q5 to only e.g., 1000 )
+    res_instances = await trim_children(res_instances)
 
     res_instances = await handle_duplicate_results(res_instances, table_type_path='horizontal')
 

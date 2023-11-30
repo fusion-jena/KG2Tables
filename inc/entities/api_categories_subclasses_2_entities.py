@@ -1,10 +1,12 @@
+import json
+
 import config
 from inc import api_classes, api_properties
 import csv
 from os.path import join, realpath, exists
 from os import makedirs
 
-from util.util_categories import get_categories_from_file, handle_duplicate_results
+from util.util_categories import get_categories_from_file, handle_duplicate_results, trim_children
 from util.util import batched
 from util import util_log
 import config
@@ -97,6 +99,9 @@ async def generate_recursive_entity_tables(categories, res_strs, depth=0):
     # pass these categories to get subclasses
     res_subclasses = await api_classes.get_subclasses(categories)
 
+    # limit number of instances to configured value (Q5 to only e.g., 1000 )
+    res_subclasses = await trim_children(res_subclasses)
+
     res_subclasses = await handle_duplicate_results(res_subclasses, 'entities')
 
     new_subs_categories = util_log.log_diff(
@@ -105,7 +110,14 @@ async def generate_recursive_entity_tables(categories, res_strs, depth=0):
                 'New items found via [Subclasses]:'.format(depth),
         res_dict=res_subclasses)
 
-    await handle_results(res_subclasses, res_strs, are_subclasses=True)
+    try:
+        await handle_results(res_subclasses, res_strs, are_subclasses=True)
+    except KeyError as e:
+        util_log.error(e)
+        util_log.error('api_categories_subclasses_2_entities.py: '
+                       'await handle_results(res_subclasses, res_strs, are_subclasses=True)')
+        util_log.error('res_subclasses are: %s ' % json.dumps(res_subclasses))
+        util_log.error('res_strs are: %s ' % json.dumps(res_strs))
 
     # the returned subclasses could be new categories, based on their number of instances
     new_categories = []
@@ -117,6 +129,9 @@ async def generate_recursive_entity_tables(categories, res_strs, depth=0):
     for batch in batched(new_categories, 500):
         try:
             new_instances.update(await api_classes.get_instances(batch))
+
+            # limit number of instances to configured value (Q5 to only e.g., 1000 )
+            new_instances = await trim_children(new_instances)
         except Exception as e:
             print(e)
 
@@ -137,7 +152,15 @@ async def generate_recursive_entity_tables(categories, res_strs, depth=0):
     res_strs = await api_properties.get_strings_for_lst(new_categories)
 
     # handle tables that come from the new instances
-    await handle_results(new_instances, res_strs, are_subclasses=False)
+
+    try:
+        await handle_results(new_instances, res_strs, are_subclasses=False)
+    except KeyError as e:
+        util_log.error(e)
+        util_log.error('api_categories_subclasses_2_entities.py: '
+                       'await handle_results(new_instances, res_strs, are_subclasses=False)')
+        util_log.error('res_subclasses are: %s ' % json.dumps(res_subclasses))
+        util_log.error('res_strs are: %s ' % json.dumps(res_strs))
 
     # stopping condition, you reached max depth (configured) or nothing is retrieved from the two paths (subs and inst)
     depth += 1

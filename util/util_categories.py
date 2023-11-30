@@ -1,5 +1,5 @@
 from os.path import join, realpath, exists
-from config import CATEGORIES_FILE_NAME
+from config import CATEGORIES_FILE_NAME, MAX_NO_INSTANCES
 import csv
 
 cate_file_path = join(realpath('.'), 'data', 'input', CATEGORIES_FILE_NAME)
@@ -13,6 +13,18 @@ async def get_categories_from_file():
             if row[0]:
                 cates += [row[0]]
     return list(set(cates))
+
+
+async def trim_children(res_instances):
+    """
+    Sets max number to retrieved instances per category to config.MAX_NO_INSTANCES
+    """
+    trimmed_res = {}
+
+    [trimmed_res.update({k: res_instances[k][0:min(len(res_instances[k]), MAX_NO_INSTANCES)]})
+        for k in res_instances.keys()]
+
+    return trimmed_res
 
 
 async def handle_duplicate_results(res_instances, table_type_path='entities'):
