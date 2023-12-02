@@ -102,7 +102,7 @@ def split():
                           columns=['file', 'colid', 'rowid'])
         val_cpa_gt.to_csv(join(val_path, 'targets', 'cpa_targets.csv'), sep=',', index=False, header=False,
                           columns=['file', 'subjid', 'objid'])
-        val_r2i_gt.to_csv(join(val_path, 'targets', 'r2i_targets.csv'), sep=',', index=False, header=False,
+        val_r2i_gt.to_csv(join(val_path, 'targets', 'ra_targets.csv'), sep=',', index=False, header=False,
                           columns=['file', 'rowid'])
         val_td_gt.to_csv(join(val_path, 'targets', 'td_targets.csv'), sep=',', index=False, header=False,
                          columns=['file'])
@@ -113,7 +113,7 @@ def split():
                            columns=['file', 'colid', 'rowid'])
         test_cpa_gt.to_csv(join(test_path, 'targets', 'cpa_targets.csv'), sep=',', index=False, header=False,
                            columns=['file', 'subjid', 'objid'])
-        test_r2i_gt.to_csv(join(test_path, 'targets', 'r2i_targets.csv'), sep=',', index=False, header=False,
+        test_r2i_gt.to_csv(join(test_path, 'targets', 'ra_targets.csv'), sep=',', index=False, header=False,
                            columns=['file', 'rowid'])
         test_td_gt.to_csv(join(test_path, 'targets', 'td_targets.csv'), sep=',', index=False, header=False,
                           columns=['file'])
