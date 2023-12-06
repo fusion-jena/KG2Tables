@@ -1,9 +1,9 @@
 import os
 
-BENCHMARK_NAME = 'tbiodiv10'
-CATEGORIES_FILE_NAME = 'biodiv_categories.csv'
+BENCHMARK_NAME = 'tbiomedical10'
+CATEGORIES_FILE_NAME = 'biotables_categories.csv'
 MAX_DEPTH = 10
-MAX_NO_INSTANCES = 1000  # trim retrieved instances to this MAX no . Q5 will have at most 2000 instances and subclasses!
+MAX_NO_INSTANCES = 100  # trim retrieved instances to this MAX no . Q5 will have at most 2000 instances and subclasses!
 
 ##### Lookup API Config.
 Target_Ontology = "http://wikidata.org/entity/"
