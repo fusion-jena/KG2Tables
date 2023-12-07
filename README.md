@@ -121,15 +121,14 @@ Environment variables for configuration (can also be set via docker-compose.yml)
 
 ## Citation
 ```commandline
-@dataset{tfood_zenodo_oct23,
+@dataset{kg2tables_zenodo_dec23,
   author       = {Nora Abdelmageed and
                   Ernesto Jimènez-Ruiz and
                   Oktie Hassanzadeh and
                   Birgitta König-Ries},
-  title        = {{tFood: Semantic Table Annotations Benchmark for 
-                   Food Domain}},  
+  title        = {{KG2Tables: Semantic Table Interpretation Benchmarks Generator Code (v1.0.0)}},  
   year         = 2023,  
-  doi          = {10.5281/zenodo.10048187},
-  url          = {https://doi.org/10.5281/zenodo.10048187}
+  doi          = {10.5281/zenodo.10285835},
+  url          = {https://doi.org/10.5281/zenodo.10285835}
 }
 ```
