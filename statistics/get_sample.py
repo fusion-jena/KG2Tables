@@ -13,9 +13,11 @@ seed(42)
 Results_Path = join(realpath('..'), 'data', 'results')
 Data_Path = join(realpath('..'), 'data', 'results')
 
-dataset_names = ['tFood', 'tfood10']
+dataset_names = ['tfood', 'tfood10']
 
 sample_size = 3  # this is percent value --> 1%
+
+chunksize = 10000  # How many lines to be processed at the same time - lazy loading paramter
 
 
 ###############################################################
@@ -46,36 +48,21 @@ def sample_targets_gt(sample_tables, targets_path, dest_targets_path):
     targets = listdir(targets_path)
 
     for target in targets:
-        df = pd.read_csv(join(targets_path, target), header=0)
+        # Lazy loading with pandas to handle huge files e.g., cea_targets and gt data.
+        with pd.read_csv(join(targets_path, target), chunksize=chunksize, header=0) as reader:
+            for df in reader:
+                # Add header to the dataframe to enable a vectorized code for filteration
+                cols = ['file'] + [f'col{i}' for i in range(df.shape[1] - 1)]
+                df = df.set_axis(cols, axis=1)
 
-        # Add header to the dataframe to enable a vectorized code for filteration
-        cols = ['file'] + [f'col{i}' for i in range(df.shape[1] - 1)]
-        df = df.set_axis(cols, axis=1)
+                # actual filteration step
+                df = df[df['file'].isin(sample_tables)]
 
-        # actual filteration step
-        df = df[df['file'].isin(sample_tables)]
-        print(target)
-        print(df.head(5))
+                print(f'Appending Lines: {len(df)}  to: {target}')
 
-        # save it to the destination targets
-        df.to_csv(join(dest_targets_path, target), header=0, index=0)
-
-
-# def sample_gt(sample_tables, gt_path, dest_gts_path):
-#     gts = listdir(gt_path)
-#
-#     for gt in gts:
-#         df = pd.read_csv(join(gt_path, gt), header=0)
-#
-#         cols = ['file'] + [f'col{i}' for i in range(df.shape[1] - 1)]
-#         df = df.set_axis(cols, axis=1)
-#
-#         # actual filteration step
-#         df = df[df['file'].isin(sample_tables)]
-#         print(gt)
-#         print(df.head(5))
-#
-#         df.to_csv(join(dest_gts_path, gt), header=0, index=0)
+                # save it to the destination targets with append mode
+                df.to_csv(join(dest_targets_path, target), mode='a', header=0, index=0)
+    print('=============================================')
 
 
 if __name__ == '__main__':
