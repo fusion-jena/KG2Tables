@@ -7,8 +7,8 @@ This service provides the proxy to Wikidata KG (Lookup API + Sparql Endpoint) to
 * **tBiodiv** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10283015.svg)](https://doi.org/10.5281/zenodo.10283015)
  & **tBiodivL** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10283083.svg)](https://doi.org/10.5281/zenodo.10283083)
   * Both datasets are generated for the Biodiversity domain with 2, and 10 levels of the internal tree, respectively. 
-* **tBiomedical** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10283103.svg)](https://doi.org/10.5281/zenodo.10283103)
- & **tBiomedicalL** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10283119.svg)](https://doi.org/10.5281/zenodo.10283119)
+* **tBiomed** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10283103.svg)](https://doi.org/10.5281/zenodo.10283103)
+ & **tBiomedL** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10283119.svg)](https://doi.org/10.5281/zenodo.10283119)
   * Both datasets are generated for the Biomedical domain using a configration of 2, and 5 levels, respectively. 
 ## Semantic Table Interpretation/Annotation (STI/STA) 
 * STI or STA is the task of annotating tabular data semantically using Knowledge Graphs (KGs)
