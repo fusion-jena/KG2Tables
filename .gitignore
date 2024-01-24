@@ -4,5 +4,5 @@ __pycache__
 *.log
 venv
 .venv
-data/*
+data/results*
 statistics/Data_Explore_Results

@@ -1,0 +1,68 @@
+Q6460735,Meal 
+Q80973,Breakfast 
+Q96748570,Snack 
+Q12896105,Lunch 
+Q657221,Dinner 
+,
+Q746549,Dish 
+Q178,pasta 
+Q1427844,meat dish 
+Q27994921,poultry dish 
+Q28100020,pork dish 
+Q11559422,seafood dish 
+Q84431525,vegetable dish 
+Q100290176,fruit dish 
+Q98826752,noodle dish 
+Q21976260,rice dish  
+Q3688975,side dish 
+Q2382369,sweet dish 
+Q1485476,cold dishes 
+Q6663,hamburger 
+Q177 ,pizza 
+Q28803,sandwich 
+Q2920963,stew 
+Q41415,soup 
+Q182940,dessert 
+,
+Q40050,beverage/drink 
+Q154,alcoholic beverage 
+Q2647467,nonalcoholic beverage 
+Q7892,drinking water 
+Q2813,CocaCola 
+Q8492,juice 
+Q11090700,tea 
+Q8486,coffee 
+Q13290,smoothie 
+,
+Q14915034,Course 
+Q41415,soup 
+Q182940,dessert 
+Q1628963,appetizer 
+Q772630,main course 
+,
+Q951964,food Product 
+Q1427887,meat product 
+Q66684759,vegetable products 
+Q185217,dairy products 
+,
+Q219239,recipe 
+Q114500815,family recipe 
+Q107638028,wild food recipe 
+Q59865222,vegan recipe 
+Q56570230,Wikibooks Cookbook article 
+Q22907482,Cookstrip 
+,
+Q10675206,ingredient  
+Q25403900,food ingredient
+Q3314483,fruit 
+Q11004,vegetable 
+Q2995529,grain
+Q12117 ,cereal 
+Q10943,cheese 
+Q42527,spice 
+Q427457,cooking oil 
+Q4739805,vegetable oil 
+Q34172,butter 
+Q29476,baking powder 
+Q179731,baking soda 
+Q719725,yeast 
