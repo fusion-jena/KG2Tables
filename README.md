@@ -9,7 +9,7 @@ This service provides the proxy to Wikidata KG (Lookup API + Sparql Endpoint) to
   * Both datasets are generated for the Biodiversity domain with 2, and 10 levels of the internal tree, respectively. 
 * **tBiomed** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10283103.svg)](https://doi.org/10.5281/zenodo.10283103)
  & **tBiomedL** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10283119.svg)](https://doi.org/10.5281/zenodo.10283119)
-  * Both datasets are generated for the Biomedical domain using a configration of 2, and 5 levels, respectively. 
+  * Both datasets are generated for the Biomedical domain using a configuration of 2, and 5 levels, respectively. 
 ## Semantic Table Interpretation/Annotation (STI/STA) 
 * STI or STA is the task of annotating tabular data semantically using Knowledge Graphs (KGs)
 * The following image represent the summary of the 5 state-of-the-art tasks for STI
@@ -39,8 +39,12 @@ This service provides the proxy to Wikidata KG (Lookup API + Sparql Endpoint) to
 
 ## Quick Setup 
 
-* Make sure that the desired categories are under `data\input\categories.csv`
-* ```hypercorn main:app -c python:asgi_config.py```
+1. Python virtual environments (venvs) are recommended to run this project - python 3.11 - make sure you are pointing to the main dir of the project
+2. ```pip install -r requirements.txt```
+3. Make sure that the desired categories are under `data\input\categories.csv` see examples [here](https://github.com/fusion-jena/KG2Tables/tree/main/data/input)
+4. Tune your configuration file (benchmark name, maximum depth (default =10)
+5. ```hypercorn main:app -c python:asgi_config.py```
+6. In your web browser or Postman, you can hit ```generate_benchmark_at_once``` GET API that generates your benchmarks 
 
 
 ## Endpoints
