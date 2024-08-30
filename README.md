@@ -125,15 +125,18 @@ Environment variables for configuration (can also be set via docker-compose.yml)
 
 ## Citation
 ```commandline
-@dataset{tfood_zenodo_oct23,
-  author       = {Nora Abdelmageed and
-                  Ernesto Jimènez-Ruiz and
-                  Oktie Hassanzadeh and
-                  Birgitta König-Ries},
-  title        = {{tFood: Semantic Table Annotations Benchmark for 
-                   Food Domain}},  
-  year         = 2023,  
-  doi          = {10.5281/zenodo.10048187},
-  url          = {https://doi.org/10.5281/zenodo.10048187}
+@software{abdelmageed_2023_10285835,
+  author       = {Abdelmageed, Nora and
+                  Jimènez-Ruiz, Ernesto and
+                  Hassanzadeh, Oktie and
+                  König-Ries, Birgitta},
+  title        = {{KG2Tables: Semantic Table Interpretation 
+                   Benchmarks Generator Code}},
+  month        = dec,
+  year         = 2023,
+  publisher    = {Zenodo},
+  version      = {v1.0.0},
+  doi          = {10.5281/zenodo.10285835},
+  url          = {https://doi.org/10.5281/zenodo.10285835}
 }
 ```
